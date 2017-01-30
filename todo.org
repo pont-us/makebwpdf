@@ -1,0 +1,13 @@
+* TODO More flexible input
+  Just take input filenames from the command line. They don't
+  have be TIFFs either.
+* TODO Do the processing in a temporary directory
+  Currently we spam intermediate files all over the current directory
+  and don't clean up afterwards. This is bad.
+* TODO Allow user to specify output file
+  Need to think a little about how to do this.
+  Optional argument? First non-optional argument? Last non-optional
+  argument? If optional, what's the default? Since we delegate
+  to tiff2pdf we could just pass an -o parameter through if it
+  exists. If not, tiff2pdf will write to stdout.
+
