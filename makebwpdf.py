@@ -1,5 +1,16 @@
 #!/usr/bin/python3
 
+"""
+Convert a series of image files to a multi-page bilevel (i.e. black and
+white) PDF.
+
+Requires: econvert (from https://exactcode.com/opensource/exactimage/ ),
+tiffcp, and tiff2pdf.
+
+By Pontus Lurcock, 2017 (pont -at- talvi.net).
+Released into the public domain.
+"""
+
 import subprocess
 import argparse
 import os

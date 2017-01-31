@@ -13,5 +13,6 @@
   argument? If optional, what's the default? Since we delegate
   to tiff2pdf we could just pass an -o parameter through if it
   exists. If not, tiff2pdf will write to stdout.
-* TODO Write a README
+* DONE Write a README
+  CLOSED: [2017-01-31 Tue 17:51]
 * TODO Proper installation via setup.py and entry point
