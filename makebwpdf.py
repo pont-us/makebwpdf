@@ -1,33 +1,51 @@
 #!/usr/bin/python3
 
-import glob
 import subprocess
 import argparse
+import os
+import os.path
+from tempfile import TemporaryDirectory
 
 def main():
 
     parser = argparse.ArgumentParser()
 
+    # good brightness: -0.35
     parser.add_argument("--brightness", "-b",
-                        type = str, nargs = 1,
-                        default = "0")
+                        type=str, nargs=1,
+                        default="0")
+    parser.add_argument("--output", "-o",
+                        type=str, nargs=1)
+    parser.add_argument("input_file",
+                        type=str, nargs="+",
+                        help="input filename")
     args = parser.parse_args()
 
-    # good brightness: -0.35
-    for filename in glob.glob("????.tiff"):
-        outfile = filename[:-5] + "-bw.tiff" 
-        subprocess.call(["econvert",
-                        "-i", filename,
-                        "--brightness", args.brightness[0],
-                        "--colorspace", "bilevel",
-                         "--output", outfile])
-    subprocess.call("tiffcp -c g4 ????-bw.tiff all.tiff",
-                    shell=True)
-    subprocess.call(["tiff2pdf",
-                    "-c", "g4",
-                    "-x600", "-y600",
-                    "-o", "all.pdf",
-                     "all.tiff"])
+    with TemporaryDirectory() as tempdir:
+
+        pages_dir = os.path.join(tempdir, "pages")
+        os.mkdir(pages_dir)
+
+        for filename in args.input_file:
+            outfile = os.path.join(pages_dir, filename + ".tiff")
+            subprocess.call(["econvert",
+                             "-i", filename,
+                             "--brightness", args.brightness[0],
+                             "--colorspace", "bilevel",
+                             "--output", outfile])
+
+        tiffcp_args = ["tiffcp", "-c", "g4"]
+        tiffcp_args += [os.path.join("pages", f + ".tiff")
+                        for f in args.input_file]
+        tiffcp_args.append("all.tiff")
+        subprocess.call(tiffcp_args, cwd=tempdir)
+
+        tiff2pdf_args = ["tiff2pdf", "-c", "g4",
+                         "-x600", "-y600"]
+        if args.output is not None:
+            tiff2pdf_args += ["-o", args.output[0]]
+        tiff2pdf_args.append(os.path.join(tempdir, "all.tiff"))
+        subprocess.call(tiff2pdf_args)
 
 if __name__ == "__main__":
     main()

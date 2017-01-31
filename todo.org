@@ -1,13 +1,17 @@
-* TODO More flexible input
+* DONE More flexible input
+  CLOSED: [2017-01-31 Tue 16:42]
   Just take input filenames from the command line. They don't
   have be TIFFs either.
-* TODO Do the processing in a temporary directory
+* DONE Do the processing in a temporary directory
+  CLOSED: [2017-01-31 Tue 16:32]
   Currently we spam intermediate files all over the current directory
   and don't clean up afterwards. This is bad.
-* TODO Allow user to specify output file
+* DONE Allow user to specify output file
+  CLOSED: [2017-01-31 Tue 16:32]
   Need to think a little about how to do this.
   Optional argument? First non-optional argument? Last non-optional
   argument? If optional, what's the default? Since we delegate
   to tiff2pdf we could just pass an -o parameter through if it
   exists. If not, tiff2pdf will write to stdout.
-
+* TODO Write a README
+* TODO Proper installation via setup.py and entry point
