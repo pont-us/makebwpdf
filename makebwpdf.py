@@ -27,6 +27,9 @@ def main():
                         default="0")
     parser.add_argument("--output", "-o",
                         type=str, nargs=1)
+    parser.add_argument("--papersize", "-p",
+                        help="Paper size (passed to tiff2pdf)",
+                        type=str, nargs=1)
     parser.add_argument("input_file",
                         type=str, nargs="+",
                         help="input filename")
@@ -51,10 +54,11 @@ def main():
         tiffcp_args.append("all.tiff")
         subprocess.call(tiffcp_args, cwd=tempdir)
 
-        tiff2pdf_args = ["tiff2pdf", "-c", "g4",
-                         "-x600", "-y600"]
+        tiff2pdf_args = ["tiff2pdf", "-c", "g4", "-x600", "-y600"]
         if args.output is not None:
             tiff2pdf_args += ["-o", args.output[0]]
+        if args.papersize is not None:
+            tiff2pdf_args += ["-p", args.papersize[0]]
         tiff2pdf_args.append(os.path.join(tempdir, "all.tiff"))
         subprocess.call(tiff2pdf_args)
 
