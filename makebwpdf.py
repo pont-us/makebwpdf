@@ -30,13 +30,23 @@ def main():
     parser.add_argument("--papersize", "-p",
                         help="Paper size (passed to tiff2pdf)",
                         type=str, nargs=1)
+    parser.add_argument("--tempdir", "-t",
+                        help="Use this as temporary directory (for debugging)",
+                        type=str)
     parser.add_argument("input_file",
                         type=str, nargs="+",
                         help="input filename")
     args = parser.parse_args()
 
-    with TemporaryDirectory() as tempdir:
+    if args.tempdir is None:
+        with TemporaryDirectory() as tempdir:
+            process(args, tempdir)
+    else:
+        process(args, args.tempdir)
 
+
+def process(args, tempdir):
+        
         pages_dir = os.path.join(tempdir, "pages")
         os.mkdir(pages_dir)
 
