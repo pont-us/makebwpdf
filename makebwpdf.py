@@ -29,7 +29,10 @@ def main():
                         help="Paper size (passed to tiff2pdf)",
                         type=str, nargs=1)
     parser.add_argument("--tempdir", "-t",
-                        help="Use this as temporary directory (for debugging)",
+                        help="Use TEMPDIR as temporary directory",
+                        type=str)
+    parser.add_argument("--rotate", "-r",
+                        help="Rotate pages by the given number of degrees",
                         type=str)
     parser.add_argument("input_file",
                         type=str, nargs="+",
@@ -49,11 +52,14 @@ def process(args, tempdir):
 
     for filename in args.input_file:
         outfile = os.path.join(pages_dir, filename + ".tiff")
-        subprocess.call(["econvert",
+        econvert_args = ["econvert",
                          "-i", filename,
                          "--brightness", args.brightness[0],
-                         "--colorspace", "bilevel",
-                         "--output", outfile])
+                         "--colorspace", "bilevel"]
+        if args.rotate is not None:
+            econvert_args += ["--rotate", args.rotate]
+        econvert_args += ["--output", outfile]
+        subprocess.call(econvert_args)
 
     tiffcp_args = ["tiffcp", "-c", "g4"]
     tiffcp_args += [os.path.join("pages", f + ".tiff")
