@@ -5,7 +5,7 @@ Convert a series of image files to a multi-page bilevel (i.e. black and
 white) PDF.
 
 Requires: econvert (from https://exactcode.com/opensource/exactimage/ ),
-tiffcp, tiff2pdf, pdfsandwich.
+tiffcp, tiff2pdf, ImageMagick convert, pdfsandwich.
 
 By Pontus Lurcock, 2017-2020 (pont -at- talvi.net).
 Released into the public domain.
@@ -22,6 +22,7 @@ from tempfile import TemporaryDirectory
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--brightness", "-b",
+                        help="Brightness adjustment (default: 0)",
                         type=str, nargs=1,
                         default="0")
     parser.add_argument("--output", "-o",
