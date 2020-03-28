@@ -16,3 +16,17 @@
 * DONE Write a README
   CLOSED: [2017-01-31 Tue 17:51]
 * TODO Proper installation via setup.py and entry point
+* TODO Add option to scan image
+  [2020-03-28 Sat] Add an option which acquires a page image directly
+  from a scanner rather than having it supplied as a file.
+* TODO Add an "append" option
+  [2020-03-28 Sat] Add an option to append the output to an existing PDF
+  file. Would be particularly useful in conjunction with the planned
+  "scan" option.
+* TODO Catch subprocess errors
+  [2020-03-28 Sat] Currently, exit statuses of subprocesses are not
+  checked, so an error at an early stage in the process is likely to
+  result in a cascade of other errors as programs try to read non-existent
+  files.
+* TODO Refactor process function
+  [2020-03-28 Sat] ~process(args, tempdir)~ should be split up.
