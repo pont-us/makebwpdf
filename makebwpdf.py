@@ -5,7 +5,7 @@ Convert a series of image files to a multi-page bilevel (i.e. black and
 white) PDF.
 
 Requires: econvert (from https://exactcode.com/opensource/exactimage/ ),
-tiffcp, and tiff2pdf.
+tiffcp, tiff2pdf, pdfsandwich.
 
 By Pontus Lurcock, 2017-2020 (pont -at- talvi.net).
 Released into the public domain.
@@ -15,6 +15,7 @@ import argparse
 import os
 import os.path
 import subprocess
+import shutil
 from tempfile import TemporaryDirectory
 
 
@@ -24,7 +25,8 @@ def main():
                         type=str, nargs=1,
                         default="0")
     parser.add_argument("--output", "-o",
-                        type=str, nargs=1)
+                        help="Output filename (required)",
+                        type=str, nargs=1, required=True)
     parser.add_argument("--papersize", "-p",
                         help="Paper size (passed to tiff2pdf)",
                         type=str, nargs=1)
@@ -33,6 +35,10 @@ def main():
                         type=str)
     parser.add_argument("--rotate", "-r",
                         help="Rotate pages by the given number of degrees",
+                        type=str)
+    parser.add_argument("--languages", "-l",
+                        help="OCR the scan in these languages "
+                             "(e.g. 'eng+deu')",
                         type=str)
     parser.add_argument("input_file",
                         type=str, nargs="+",
@@ -67,13 +73,26 @@ def process(args, tempdir):
     tiffcp_args.append("all.tiff")
     subprocess.call(tiffcp_args, cwd=tempdir)
 
+    tiff2pdf_output_file = os.path.join(tempdir, "all.pdf")
     tiff2pdf_args = ["tiff2pdf", "-c", "g4", "-x600", "-y600"]
-    if args.output is not None:
-        tiff2pdf_args += ["-o", args.output[0]]
+    tiff2pdf_args += ["-o", tiff2pdf_output_file]
     if args.papersize is not None:
         tiff2pdf_args += ["-p", args.papersize[0]]
     tiff2pdf_args.append(os.path.join(tempdir, "all.tiff"))
     subprocess.call(tiff2pdf_args)
+
+    if args.languages is not None:
+        pdfsandwich_args = [
+            "pdfsandwich",
+            "-maxpixels", "999999999",
+            "-lang", args.languages,
+            "-o", args.output[0],
+            "-nopreproc",
+            tiff2pdf_output_file
+        ]
+        subprocess.call(pdfsandwich_args)
+    else:
+        shutil.copy2(tiff2pdf_output_file, args.output[0])
 
 
 if __name__ == "__main__":
