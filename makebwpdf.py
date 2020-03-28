@@ -40,6 +40,10 @@ def main():
                         help="OCR the scan in these languages "
                              "(e.g. 'eng+deu')",
                         type=str)
+    parser.add_argument("--correct-position", "-c",
+                        help="Correct positioning for scans from "
+                             "Brother MFC-L2710DW",
+                        action="store_true")
     parser.add_argument("input_file",
                         type=str, nargs="+",
                         help="input filename")
@@ -53,13 +57,36 @@ def main():
 
 
 def process(args, tempdir):
-    pages_dir = os.path.join(tempdir, "pages")
-    os.mkdir(pages_dir)
 
-    for filename in args.input_file:
-        outfile = os.path.join(pages_dir, filename + ".tiff")
+    pages_dir = os.path.join(tempdir, "pages_positioned")
+    basenames = []
+    os.mkdir(pages_dir)
+    i = 0
+    for input_filename in args.input_file:
+        output_basename = "{:05}".format(i)
+        basenames.append(output_basename)
+        output_filename = os.path.join(pages_dir, output_basename + ".tiff")
+        if args.correct_position:
+            convert_args = [
+                "convert", input_filename,
+                "-gravity", "southeast", "-chop", "55x0",
+                "-gravity", "northwest", "-splice", "72x90",
+                "-gravity", "southeast", "-splice", "0x52",
+                output_filename
+            ]
+            subprocess.call(convert_args)
+        else:
+            shutil.copy2(input_filename, output_filename)
+        i += 1
+
+    pages_bilevel_dir = os.path.join(tempdir, "pages_bilevel")
+    os.mkdir(pages_bilevel_dir)
+
+    for basename in basenames:
+        infile = os.path.join(pages_dir, basename + ".tiff")
+        outfile = os.path.join(pages_bilevel_dir, basename + ".tiff")
         econvert_args = ["econvert",
-                         "-i", filename,
+                         "-i", infile,
                          "--brightness", args.brightness[0],
                          "--colorspace", "bilevel"]
         if args.rotate is not None:
@@ -68,8 +95,8 @@ def process(args, tempdir):
         subprocess.call(econvert_args)
 
     tiffcp_args = ["tiffcp", "-c", "g4"]
-    tiffcp_args += [os.path.join("pages", f + ".tiff")
-                    for f in args.input_file]
+    tiffcp_args += [os.path.join(pages_bilevel_dir, basename + ".tiff")
+                    for basename in basenames]
     tiffcp_args.append("all.tiff")
     subprocess.call(tiffcp_args, cwd=tempdir)
 
