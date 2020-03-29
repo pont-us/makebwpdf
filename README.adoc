@@ -10,7 +10,7 @@ By Pontus Lurcock, 2017-2020 (pont -at- talvi.net).
 Released under the MIT license (see accompanying file LICENSE for details).
 
 ....
-usage: makebwpdf.py [-h] [--brightness BRIGHTNESS] --output OUTPUT
+usage: makebwpdf.py [-h] [--brightness BRIGHTNESS] --output OUTPUT [--append]
                     [--papersize PAPERSIZE] [--tempdir TEMPDIR]
                     [--rotate ROTATE] [--languages LANGUAGES] [--scan]
                     [--correct-position]
@@ -25,6 +25,7 @@ optional arguments:
                         Brightness adjustment (default: 0)
   --output OUTPUT, -o OUTPUT
                         Output filename (required)
+  --append, -a          Append page(s) to existing PDF output file
   --papersize PAPERSIZE, -p PAPERSIZE
                         Paper size (passed to tiff2pdf)
   --tempdir TEMPDIR, -t TEMPDIR

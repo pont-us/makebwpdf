@@ -25,7 +25,10 @@ def main():
                         default="0")
     parser.add_argument("--output", "-o",
                         help="Output filename (required)",
-                        type=str, nargs=1, required=True)
+                        type=str, required=True)
+    parser.add_argument("--append", "-a",
+                        help="Append page(s) to existing PDF output file",
+                        action="store_true")
     parser.add_argument("--papersize", "-p",
                         help="Paper size (passed to tiff2pdf)",
                         type=str, nargs=1)
@@ -52,17 +55,27 @@ def main():
     args = parser.parse_args()
 
     if not args.input_files and not args.scan:
-        print(os.path.basename(sys.argv[0]) +
-              ": error: either the --scan option or at least "
-              "one input file must be supplied.",
-              file=sys.stderr)
-        sys.exit(1)
+        exit_with_error(": error: either the --scan option or at least "
+                        "one input file must be supplied.")
+
+    if args.append:
+        if not os.path.isfile(args.output):
+            exit_with_error("cannot append, since output file does not exist")
+    else:
+        if os.path.exists(args.output):
+            exit_with_error("output file exists "
+                            "(use --append to append to it)")
 
     if args.tempdir is None:
         with TemporaryDirectory() as tempdir:
             process(args, tempdir)
     else:
         process(args, os.path.abspath(args.tempdir))
+
+
+def exit_with_error(message):
+    print(os.path.basename(sys.argv[0]) + ": " + message, file=sys.stderr)
+    sys.exit(1)
 
 
 def process(args, tempdir):
@@ -75,7 +88,12 @@ def process(args, tempdir):
     convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir)
     make_multipage_tiff(basenames, pages_bilevel_dir, tempdir)
     tiff2pdf_output_file = convert_tiff_to_pdf(args, tempdir)
-    perform_ocr_on_pdf(args, tiff2pdf_output_file)
+    ocr_output_file = os.path.join(tempdir, "all_ocr.pdf")
+    perform_ocr_on_pdf(args.languages, tiff2pdf_output_file, ocr_output_file)
+    if args.append:
+        append_pdf(args.output, ocr_output_file, tempdir)
+    else:
+        shutil.copy2(ocr_output_file, args.output)
 
 
 def scan_document(tempdir):
@@ -156,20 +174,31 @@ def convert_tiff_to_pdf(args, tempdir):
     return tiff2pdf_output_file
 
 
-def perform_ocr_on_pdf(args, tiff2pdf_output_file):
+def perform_ocr_on_pdf(languages, input_file, output_file):
     """Perform OCR on the PDF, if requested in arguments."""
-    if args.languages is not None:
+    if languages is not None:
         pdfsandwich_args = [
             "pdfsandwich",
             "-maxpixels", "999999999",
-            "-lang", args.languages,
-            "-o", args.output[0],
+            "-lang", languages,
+            "-o", output_file,
             "-nopreproc",
-            tiff2pdf_output_file
+            input_file
         ]
         subprocess.check_call(pdfsandwich_args)
     else:
-        shutil.copy2(tiff2pdf_output_file, args.output[0])
+        shutil.copy2(input_file, output_file)
+
+
+def append_pdf(main_file, additional_file, tempdir):
+    output_file = os.path.join(tempdir, "appended.pdf")
+    pdftk_args = [
+        "pdftk", main_file, additional_file,
+        "cat",
+        "output", output_file
+    ]
+    subprocess.check_call(pdftk_args)
+    shutil.copy2(output_file, main_file)
 
 
 if __name__ == "__main__":
