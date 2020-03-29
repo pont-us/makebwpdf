@@ -15,6 +15,9 @@
   exists. If not, tiff2pdf will write to stdout.
 * DONE Write a README
   CLOSED: [2017-01-31 Tue 17:51]
+* DONE Refactor process function
+  CLOSED: [2020-03-29 Sun 10:26]
+  [2020-03-28 Sat] ~process(args, tempdir)~ should be split up.
 * TODO Proper installation via setup.py and entry point
 * TODO Add option to scan image
   [2020-03-28 Sat] Add an option which acquires a page image directly
@@ -28,5 +31,9 @@
   checked, so an error at an early stage in the process is likely to
   result in a cascade of other errors as programs try to read non-existent
   files.
-* TODO Refactor process function
-  [2020-03-28 Sat] ~process(args, tempdir)~ should be split up.
+* TODO Switch from pdfsandwich to ocrmypdf for OCR?
+  [2020-03-29 Sun] ocrmypdf's major advantange (that it doesn't re-encode
+  images) doesn't make much difference for makebwpdf, because the PDFs
+  only contain bilevel images anyway and pdfsandwich can re-encode them to
+  CCITT-4 -- however, I have the impression that ocrmypdf is more capable
+  and better maintained overall.

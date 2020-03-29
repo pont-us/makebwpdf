@@ -55,8 +55,17 @@ def main():
 
 
 def process(args, tempdir):
-
     pages_dir = os.path.join(tempdir, "pages_positioned")
+    basenames = reposition(args, pages_dir)
+    pages_bilevel_dir = os.path.join(tempdir, "pages_bilevel")
+    convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir)
+    make_multipage_tiff(basenames, pages_bilevel_dir, tempdir)
+    tiff2pdf_output_file = convert_tiff_to_pdf(args, tempdir)
+    perform_ocr_on_pdf(args, tiff2pdf_output_file)
+
+
+def reposition(args, pages_dir):
+    """Adjust page positions if requested in arguments."""
     basenames = []
     os.mkdir(pages_dir)
     i = 0
@@ -76,10 +85,12 @@ def process(args, tempdir):
         else:
             shutil.copy2(input_filename, output_filename)
         i += 1
+    return basenames
 
-    pages_bilevel_dir = os.path.join(tempdir, "pages_bilevel")
+
+def convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir):
+    """Convert single-page TIFFs to bilevel colour space."""
     os.mkdir(pages_bilevel_dir)
-
     for basename in basenames:
         infile = os.path.join(pages_dir, basename + ".tiff")
         outfile = os.path.join(pages_bilevel_dir, basename + ".tiff")
@@ -92,12 +103,18 @@ def process(args, tempdir):
         econvert_args += ["--output", outfile]
         subprocess.call(econvert_args)
 
+
+def make_multipage_tiff(basenames, pages_bilevel_dir, tempdir):
+    """Combine single-page TIFFs into a multi-page TIFF."""
     tiffcp_args = ["tiffcp", "-c", "g4"]
     tiffcp_args += [os.path.join(pages_bilevel_dir, basename + ".tiff")
                     for basename in basenames]
     tiffcp_args.append("all.tiff")
     subprocess.call(tiffcp_args, cwd=tempdir)
 
+
+def convert_tiff_to_pdf(args, tempdir):
+    """Convert multi-page TIFF to PDF."""
     tiff2pdf_output_file = os.path.join(tempdir, "all.pdf")
     tiff2pdf_args = ["tiff2pdf", "-c", "g4", "-x600", "-y600"]
     tiff2pdf_args += ["-o", tiff2pdf_output_file]
@@ -105,7 +122,11 @@ def process(args, tempdir):
         tiff2pdf_args += ["-p", args.papersize[0]]
     tiff2pdf_args.append(os.path.join(tempdir, "all.tiff"))
     subprocess.call(tiff2pdf_args)
+    return tiff2pdf_output_file
 
+
+def perform_ocr_on_pdf(args, tiff2pdf_output_file):
+    """Perform OCR on the PDF, if requested in arguments."""
     if args.languages is not None:
         pdfsandwich_args = [
             "pdfsandwich",
