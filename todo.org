@@ -26,11 +26,19 @@
   [2020-03-28 Sat] Add an option to append the output to an existing PDF
   file. Would be particularly useful in conjunction with the planned
   "scan" option.
-* TODO Catch subprocess errors
+* DONE Catch subprocess errors
+  CLOSED: [2020-03-29 Sun 12:12]
   [2020-03-28 Sat] Currently, exit statuses of subprocesses are not
   checked, so an error at an early stage in the process is likely to
   result in a cascade of other errors as programs try to read non-existent
   files.
+
+  [2020-03-29 Sun] Fixed crudely by replacing calls to subprocess.call
+  with subprocess.check_call, which throws an exception if the subprocess
+  exits with an non-zero status. The exception is not further handled,
+  so makebwpdf terminates with an ugly stack trace, but it's cleaner
+  and clearer than blindly ploughing on with the remaining processing
+  steps.
 * TODO Switch from pdfsandwich to ocrmypdf for OCR?
   [2020-03-29 Sun] ocrmypdf's major advantange (that it doesn't re-encode
   images) doesn't make much difference for makebwpdf, because the PDFs

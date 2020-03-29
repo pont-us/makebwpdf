@@ -81,7 +81,7 @@ def reposition(args, pages_dir):
                 "-gravity", "southeast", "-splice", "0x52",
                 output_filename
             ]
-            subprocess.call(convert_args)
+            subprocess.check_call(convert_args)
         else:
             shutil.copy2(input_filename, output_filename)
         i += 1
@@ -101,7 +101,7 @@ def convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir):
         if args.rotate is not None:
             econvert_args += ["--rotate", args.rotate]
         econvert_args += ["--output", outfile]
-        subprocess.call(econvert_args)
+        subprocess.check_call(econvert_args)
 
 
 def make_multipage_tiff(basenames, pages_bilevel_dir, tempdir):
@@ -110,7 +110,7 @@ def make_multipage_tiff(basenames, pages_bilevel_dir, tempdir):
     tiffcp_args += [os.path.join(pages_bilevel_dir, basename + ".tiff")
                     for basename in basenames]
     tiffcp_args.append("all.tiff")
-    subprocess.call(tiffcp_args, cwd=tempdir)
+    subprocess.check_call(tiffcp_args, cwd=tempdir)
 
 
 def convert_tiff_to_pdf(args, tempdir):
@@ -121,7 +121,7 @@ def convert_tiff_to_pdf(args, tempdir):
     if args.papersize is not None:
         tiff2pdf_args += ["-p", args.papersize[0]]
     tiff2pdf_args.append(os.path.join(tempdir, "all.tiff"))
-    subprocess.call(tiff2pdf_args)
+    subprocess.check_call(tiff2pdf_args)
     return tiff2pdf_output_file
 
 
@@ -136,7 +136,7 @@ def perform_ocr_on_pdf(args, tiff2pdf_output_file):
             "-nopreproc",
             tiff2pdf_output_file
         ]
-        subprocess.call(pdfsandwich_args)
+        subprocess.check_call(pdfsandwich_args)
     else:
         shutil.copy2(tiff2pdf_output_file, args.output[0])
 
