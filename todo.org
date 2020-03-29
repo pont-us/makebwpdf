@@ -18,14 +18,6 @@
 * DONE Refactor process function
   CLOSED: [2020-03-29 Sun 10:26]
   [2020-03-28 Sat] ~process(args, tempdir)~ should be split up.
-* TODO Proper installation via setup.py and entry point
-* TODO Add option to scan image
-  [2020-03-28 Sat] Add an option which acquires a page image directly
-  from a scanner rather than having it supplied as a file.
-* TODO Add an "append" option
-  [2020-03-28 Sat] Add an option to append the output to an existing PDF
-  file. Would be particularly useful in conjunction with the planned
-  "scan" option.
 * DONE Catch subprocess errors
   CLOSED: [2020-03-29 Sun 12:12]
   [2020-03-28 Sat] Currently, exit statuses of subprocesses are not
@@ -39,6 +31,15 @@
   so makebwpdf terminates with an ugly stack trace, but it's cleaner
   and clearer than blindly ploughing on with the remaining processing
   steps.
+* DONE Add option to scan image
+  CLOSED: [2020-03-29 Sun 13:48]
+  [2020-03-28 Sat] Add an option which acquires a page image directly
+  from a scanner rather than having it supplied as a file.
+* TODO Add an "append" option
+  [2020-03-28 Sat] Add an option to append the output to an existing PDF
+  file. Would be particularly useful in conjunction with the planned
+  "scan" option.
+* TODO Proper installation via setup.py and entry point
 * TODO Switch from pdfsandwich to ocrmypdf for OCR?
   [2020-03-29 Sun] ocrmypdf's major advantange (that it doesn't re-encode
   images) doesn't make much difference for makebwpdf, because the PDFs

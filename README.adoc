@@ -12,12 +12,12 @@ Released under the MIT license (see accompanying file LICENSE for details).
 ....
 usage: makebwpdf.py [-h] [--brightness BRIGHTNESS] --output OUTPUT
                     [--papersize PAPERSIZE] [--tempdir TEMPDIR]
-                    [--rotate ROTATE] [--languages LANGUAGES]
+                    [--rotate ROTATE] [--languages LANGUAGES] [--scan]
                     [--correct-position]
-                    input_file [input_file ...]
+                    [input_files [input_files ...]]
 
 positional arguments:
-  input_file            input filename
+  input_files           input filename
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -32,7 +32,8 @@ optional arguments:
   --rotate ROTATE, -r ROTATE
                         Rotate pages by the given number of degrees
   --languages LANGUAGES, -l LANGUAGES
-                        OCR the scan in these languages (e.g. 'eng+deu')
+                        OCR the PDF in these languages (e.g. 'eng+deu')
+  --scan, -s            Acquire image from scanner (ignores input files)
   --correct-position, -c
                         Correct positioning for scans from Brother MFC-L2710DW
 ....

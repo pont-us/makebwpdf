@@ -11,8 +11,9 @@ Released under the MIT license (see accompanying file LICENSE for details).
 import argparse
 import os
 import os.path
-import subprocess
 import shutil
+import subprocess
+import sys
 from tempfile import TemporaryDirectory
 
 
@@ -35,28 +36,41 @@ def main():
                         help="Rotate pages by the given number of degrees",
                         type=str)
     parser.add_argument("--languages", "-l",
-                        help="OCR the scan in these languages "
+                        help="OCR the PDF in these languages "
                              "(e.g. 'eng+deu')",
                         type=str)
+    parser.add_argument("--scan", "-s",
+                        help="Acquire image from scanner (ignores input files)",
+                        action="store_true")
     parser.add_argument("--correct-position", "-c",
                         help="Correct positioning for scans from "
                              "Brother MFC-L2710DW",
                         action="store_true")
-    parser.add_argument("input_file",
-                        type=str, nargs="+",
+    parser.add_argument("input_files",
+                        type=str, nargs="*",
                         help="input filename")
     args = parser.parse_args()
+
+    if not args.input_files and not args.scan:
+        print(os.path.basename(sys.argv[0]) +
+              ": error: either the --scan option or at least "
+              "one input file must be supplied.",
+              file=sys.stderr)
+        sys.exit(1)
 
     if args.tempdir is None:
         with TemporaryDirectory() as tempdir:
             process(args, tempdir)
     else:
-        process(args, args.tempdir)
+        process(args, os.path.abspath(args.tempdir))
 
 
 def process(args, tempdir):
     pages_dir = os.path.join(tempdir, "pages_positioned")
-    basenames = reposition(args, pages_dir)
+    input_files = scan_document(tempdir) if args.scan \
+        else args.input_files
+    basenames = copy_and_reposition(input_files, args.correct_position,
+                                    pages_dir)
     pages_bilevel_dir = os.path.join(tempdir, "pages_bilevel")
     convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir)
     make_multipage_tiff(basenames, pages_bilevel_dir, tempdir)
@@ -64,16 +78,33 @@ def process(args, tempdir):
     perform_ocr_on_pdf(args, tiff2pdf_output_file)
 
 
-def reposition(args, pages_dir):
-    """Adjust page positions if requested in arguments."""
+def scan_document(tempdir):
+    """Acquire image from scanner."""
+
+    output_file = os.path.join(tempdir, "scan.tiff")
+    scanimage_args = [
+        "scanimage",
+        "-x", "210",
+        "-y", "297",
+        "--resolution", "600",
+        "--mode", "True Gray",
+        "--format", "tiff",
+        "--output-file", output_file
+    ]
+    subprocess.check_call(scanimage_args)
+    return [output_file]
+
+
+def copy_and_reposition(input_files, correct_position, output_dir):
+    """Copy input files and, optionally, reposition content."""
     basenames = []
-    os.mkdir(pages_dir)
+    os.mkdir(output_dir)
     i = 0
-    for input_filename in args.input_file:
+    for input_filename in input_files:
         output_basename = "{:05}".format(i)
         basenames.append(output_basename)
-        output_filename = os.path.join(pages_dir, output_basename + ".tiff")
-        if args.correct_position:
+        output_filename = os.path.join(output_dir, output_basename + ".tiff")
+        if correct_position:
             convert_args = [
                 "convert", input_filename,
                 "-gravity", "southeast", "-chop", "55x0",
