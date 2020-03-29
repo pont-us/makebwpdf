@@ -4,11 +4,8 @@
 Convert a series of image files to a multi-page bilevel (i.e. black and
 white) PDF.
 
-Requires: econvert (from https://exactcode.com/opensource/exactimage/ ),
-tiffcp, tiff2pdf, ImageMagick convert, pdfsandwich.
-
 By Pontus Lurcock, 2017-2020 (pont -at- talvi.net).
-Released into the public domain.
+Released under the MIT license (see accompanying file LICENSE for details).
 """
 
 import argparse
