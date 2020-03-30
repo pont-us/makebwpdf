@@ -40,11 +40,20 @@
   [2020-03-28 Sat] Add an option to append the output to an existing PDF
   file. Would be particularly useful in conjunction with the planned
   "scan" option.
-* TODO Add landscape option
+* DONE Add landscape option
+  CLOSED: [2020-03-30 Mon 09:36]
   [2020-03-29 Sun] The document should still be scanned as portrait (so
   that the position correction works as intended). It could be rotated by
   econvert while performing the "convert to bilevel" step.
-* TODO Proper installation via setup.py and entry point
+
+  [2020-03-30 Mon] I forgot that this is already supported via
+  ~--rotate~.
+* DONE Proper installation via setup.py and entry point
+  CLOSED: [2020-03-30 Mon 11:00]
+* TODO Support A5 paper size
+  [2020-03-30 Mon] There is currently a ~--papersize~ option, but it
+  is only used for tiff2pdf. The scanning and position correction
+  steps are hardwired for A4.
 * TODO Switch from pdfsandwich to ocrmypdf for OCR?
   [2020-03-29 Sun] ocrmypdf's major advantange (that it doesn't re-encode
   images) doesn't make much difference for makebwpdf, because the PDFs

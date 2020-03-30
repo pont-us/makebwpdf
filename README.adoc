@@ -4,17 +4,25 @@ Convert a series of image files to a multi-page bilevel (i.e. black and
 white) PDF.
 
 Requires: econvert (from https://exactcode.com/opensource/exactimage/ ),
-tiffcp, tiff2pdf, ImageMagick convert, and pdfsandwich.
+tiffcp, tiff2pdf, ImageMagick convert, pdfsandwich, and pdftk.
 
 By Pontus Lurcock, 2017-2020 (pont -at- talvi.net).
 Released under the MIT license (see accompanying file LICENSE for details).
 
+=== Installation
+
+The file `makebwpdf.py` can be run directly. It can also be installed by
+running `pip3 install makebwpdf/` from the parent directory of the repository,
+which will make the command `makebwpdf` available on the execution path.
+`pip3 install --user makebwpdf` will install it for the current user only.
+To uninstall, use `pip3 uninstall makebwpdf`.
+
+=== Usage
 ....
-usage: makebwpdf.py [-h] [--brightness BRIGHTNESS] --output OUTPUT [--append]
-                    [--papersize PAPERSIZE] [--tempdir TEMPDIR]
-                    [--rotate ROTATE] [--languages LANGUAGES] [--scan]
-                    [--correct-position]
-                    [input_files [input_files ...]]
+usage: makebwpdf [-h] [--brightness BRIGHTNESS] --output OUTPUT [--append]
+                 [--papersize PAPERSIZE] [--tempdir TEMPDIR] [--rotate ROTATE]
+                 [--languages LANGUAGES] [--scan] [--correct-position]
+                 [input_files [input_files ...]]
 
 positional arguments:
   input_files           input filename
