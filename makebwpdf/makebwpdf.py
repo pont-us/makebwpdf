@@ -180,6 +180,7 @@ def perform_ocr_on_pdf(languages, input_file, output_file):
         pdfsandwich_args = [
             "pdfsandwich",
             "-maxpixels", "999999999",
+            "-resolution", "600",
             "-lang", languages,
             "-o", output_file,
             "-nopreproc",
