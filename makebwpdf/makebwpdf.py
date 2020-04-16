@@ -30,8 +30,8 @@ def main():
                         help="Append page(s) to existing PDF output file",
                         action="store_true")
     parser.add_argument("--papersize", "-p",
-                        help="Paper size (passed to tiff2pdf)",
-                        type=str, nargs=1)
+                        help="Paper size",
+                        type=str, default="A4")
     parser.add_argument("--tempdir", "-t",
                         help="Use TEMPDIR as temporary directory",
                         type=str)
@@ -80,9 +80,9 @@ def exit_with_error(message):
 
 def process(args, tempdir):
     pages_dir = os.path.join(tempdir, "pages_positioned")
-    input_files = scan_document(tempdir) if args.scan \
+    input_files = scan_document(args, tempdir) if args.scan \
         else args.input_files
-    basenames = copy_and_reposition(input_files, args.correct_position,
+    basenames = copy_and_reposition(input_files, args,
                                     pages_dir)
     pages_bilevel_dir = os.path.join(tempdir, "pages_bilevel")
     convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir)
@@ -96,41 +96,55 @@ def process(args, tempdir):
         shutil.copy2(ocr_output_file, args.output)
 
 
-def scan_document(tempdir):
+def scan_document(args, tempdir):
     """Acquire image from scanner."""
 
     output_file = os.path.join(tempdir, "scan.tiff")
+    
+    # Unless A5 explicitly specified, we assume A4.
+    size = (148, 210) if args.papersize.lower() == "a5" else (210, 297)
+    
     scanimage_args = [
         "scanimage",
-        "-x", "210",
-        "-y", "297",
+        "-x", str(size[0]),
+        "-y", str(size[1]),
         "--resolution", "600",
         "--mode", "True Gray",
         "--format", "tiff",
-        "--output-file", output_file
+        "--output-file", os.path.join(tempdir, "scan.tiff")
     ]
     subprocess.check_call(scanimage_args)
     return [output_file]
 
 
-def copy_and_reposition(input_files, correct_position, output_dir):
+def copy_and_reposition(input_files, args, output_dir):
     """Copy input files and, optionally, reposition content."""
     basenames = []
     os.mkdir(output_dir)
     i = 0
+
+    a4_args = """
+    -gravity southeast -chop 55x0 
+    -gravity northwest -splice 72x90 
+    -gravity southeast -splice 0x52 
+    """.split()
+
+    a5_args = """
+    -gravity southeast -chop 78x0
+    -gravity northwest -splice 70x90
+    -gravity southeast -chop 0x92
+    """.split()
+
+    convert_args = a5_args if args.papersize.lower() == "a5" else a4_args
+    
     for input_filename in input_files:
         output_basename = "{:05}".format(i)
         basenames.append(output_basename)
         output_filename = os.path.join(output_dir, output_basename + ".tiff")
-        if correct_position:
-            convert_args = [
-                "convert", input_filename,
-                "-gravity", "southeast", "-chop", "55x0",
-                "-gravity", "northwest", "-splice", "72x90",
-                "-gravity", "southeast", "-splice", "0x52",
-                output_filename
-            ]
-            subprocess.check_call(convert_args)
+        if args.correct_position:
+            subprocess.check_call(["convert", input_filename ]
+                                  + convert_args
+                                  + [output_filename])
         else:
             shutil.copy2(input_filename, output_filename)
         i += 1
@@ -168,7 +182,7 @@ def convert_tiff_to_pdf(args, tempdir):
     tiff2pdf_args = ["tiff2pdf", "-c", "g4", "-x600", "-y600"]
     tiff2pdf_args += ["-o", tiff2pdf_output_file]
     if args.papersize is not None:
-        tiff2pdf_args += ["-p", args.papersize[0]]
+        tiff2pdf_args += ["-p", args.papersize]
     tiff2pdf_args.append(os.path.join(tempdir, "all.tiff"))
     subprocess.check_call(tiff2pdf_args)
     return tiff2pdf_output_file
