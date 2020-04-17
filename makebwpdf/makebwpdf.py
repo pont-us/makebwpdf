@@ -152,7 +152,7 @@ def copy_and_reposition(input_files, args, output_dir):
 
 
 def convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir):
-    """Convert single-page TIFFs to bilevel colour space."""
+    """Convert single-page TIFFs to bilevel, and optionally rotate"""
     os.mkdir(pages_bilevel_dir)
     for basename in basenames:
         infile = os.path.join(pages_dir, basename + ".tiff")
@@ -181,8 +181,6 @@ def convert_tiff_to_pdf(args, tempdir):
     tiff2pdf_output_file = os.path.join(tempdir, "all.pdf")
     tiff2pdf_args = ["tiff2pdf", "-c", "g4", "-x600", "-y600"]
     tiff2pdf_args += ["-o", tiff2pdf_output_file]
-    if args.papersize is not None:
-        tiff2pdf_args += ["-p", args.papersize]
     tiff2pdf_args.append(os.path.join(tempdir, "all.tiff"))
     subprocess.check_call(tiff2pdf_args)
     return tiff2pdf_output_file
