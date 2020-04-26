@@ -49,6 +49,9 @@ def main():
                         help="Correct positioning for scans from "
                              "Brother MFC-L2710DW",
                         action="store_true")
+    parser.add_argument("--invert", "-i",
+                        help="Invert colours",
+                        action="store_true")
     parser.add_argument("input_files",
                         type=str, nargs="*",
                         help="input filename")
@@ -163,6 +166,8 @@ def convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir):
                          "--colorspace", "bilevel"]
         if args.rotate is not None:
             econvert_args += ["--rotate", args.rotate]
+        if args.invert:
+            econvert_args.append("--negate")
         econvert_args += ["--output", outfile]
         subprocess.check_call(econvert_args)
 
