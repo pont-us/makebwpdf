@@ -16,6 +16,8 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory
 
+from PIL import Image
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -121,44 +123,53 @@ def scan_document(args, tempdir):
 
 
 def copy_and_reposition(input_files, args, output_dir):
-    """Copy input files and, optionally, reposition content."""
+    """Copy input files and, optionally, reposition content.
+
+    We convert/save to PNG rather than back to TIFF because, for some
+    unknown reason, econvert chokes on TIFFs saved by PIL."""
     basenames = []
     os.mkdir(output_dir)
     i = 0
 
-    a4_args = """
-    -gravity southeast -chop 55x0 
-    -gravity northwest -splice 72x90 
-    -gravity southeast -splice 0x52 
-    """.split()
-
-    a5_args = """
-    -gravity southeast -chop 78x0
-    -gravity northwest -splice 70x90
-    -gravity southeast -chop 0x92
-    """.split()
-
-    convert_args = a5_args if args.papersize.lower() == "a5" else a4_args
-    
     for input_filename in input_files:
         output_basename = "{:05}".format(i)
         basenames.append(output_basename)
-        output_filename = os.path.join(output_dir, output_basename + ".tiff")
+        output_filename = os.path.join(output_dir, output_basename + ".png")
         if args.correct_position:
-            subprocess.check_call(["convert", input_filename ]
-                                  + convert_args
-                                  + [output_filename])
+            if args.papersize.lower() == "a5":
+                reposition_a5(input_filename, output_filename)
+            else:
+                reposition_a4(input_filename, output_filename)
         else:
+            subprocess.run(["econvert", input_filename, output_filename])
             shutil.copy2(input_filename, output_filename)
         i += 1
     return basenames
 
 
+def reposition_a4(input_filename, output_filename):
+    scan = Image.open(input_filename)
+    assert(scan.size == (4912, 6874))
+    cropped = scan.crop((0, 0, 4889, 6874))
+    full_size = Image.new(mode="L", size=(4961, 7016), color=255)
+    full_size.paste(cropped, (72, 90))
+    full_size.save(output_filename)
+
+
+def reposition_a5(input_filename, output_filename):
+    scan = Image.open(input_filename)
+    assert(scan.size == (3440, 4911))
+    cropped = scan.crop((0, 0, 3362, 4819))
+    full_size = Image.new(mode="L", size=(3496, 4961), color=255)
+    full_size.paste(cropped, (70, 90))
+    full_size.save(output_filename)
+
+
 def convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir):
-    """Convert single-page TIFFs to bilevel, and optionally rotate"""
+    """Convert single-page PNGs to bilevel TIFFs, and optionally rotate"""
     os.mkdir(pages_bilevel_dir)
     for basename in basenames:
-        infile = os.path.join(pages_dir, basename + ".tiff")
+        infile = os.path.join(pages_dir, basename + ".png")
         outfile = os.path.join(pages_bilevel_dir, basename + ".tiff")
         econvert_args = ["econvert",
                          "-i", infile,

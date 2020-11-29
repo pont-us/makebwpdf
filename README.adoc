@@ -1,10 +1,10 @@
 == makebwpdf
 
-Convert a series of image files to a multi-page bilevel (i.e. black and
+Convert a series of image files to a multi-page bilevel (i.e. black and
 white) PDF.
 
-Requires: econvert (from https://exactcode.com/opensource/exactimage/ ),
-tiffcp, tiff2pdf, ImageMagick convert, pdfsandwich, and pdftk.
+Requires: https://exactcode.com/opensource/exactimage/[econvert],
+tiffcp, tiff2pdf, pdfsandwich, pdftk, and PIL.
 
 By Pontus Lurcock, 2017-2020 (pont -at- talvi.net).
 Released under the MIT license (see accompanying file LICENSE for details).
