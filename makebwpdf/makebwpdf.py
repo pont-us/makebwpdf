@@ -47,6 +47,9 @@ def main():
     parser.add_argument("--scan", "-s",
                         help="Acquire image from scanner (ignores input files)",
                         action="store_true")
+    parser.add_argument("--device", "-d",
+                        help="Scanner device (implies --scan)",
+                        type=str)
     parser.add_argument("--correct-position", "-c",
                         help="Correct positioning for scans from "
                              "Brother MFC-L2710DW",
@@ -59,9 +62,9 @@ def main():
                         help="input filename")
     args = parser.parse_args()
 
-    if not args.input_files and not args.scan:
-        exit_with_error(": error: either the --scan option or at least "
-                        "one input file must be supplied.")
+    if not args.input_files and not args.scan and not args.device:
+        exit_with_error(": error: the --scan option, the --device option, "
+                        " or at least one input file must be supplied.")
 
     if args.append:
         if not os.path.isfile(args.output):
@@ -85,7 +88,7 @@ def exit_with_error(message):
 
 def process(args, tempdir):
     pages_dir = os.path.join(tempdir, "pages_positioned")
-    input_files = scan_document(args, tempdir) if args.scan \
+    input_files = scan_document(args, tempdir) if (args.scan or args.device) \
         else args.input_files
     basenames = copy_and_reposition(input_files, args,
                                     pages_dir)
@@ -118,6 +121,9 @@ def scan_document(args, tempdir):
         "--format", "tiff",
         "--output-file", os.path.join(tempdir, "scan.tiff")
     ]
+    if args.device is not None:
+        scanimage_args += ["--device", args.device]
+
     subprocess.check_call(scanimage_args)
     return [output_file]
 
@@ -205,16 +211,12 @@ def convert_tiff_to_pdf(args, tempdir):
 def perform_ocr_on_pdf(languages, input_file, output_file):
     """Perform OCR on the PDF, if requested in arguments."""
     if languages is not None:
-        pdfsandwich_args = [
-            "pdfsandwich",
-            "-maxpixels", "999999999",
-            "-resolution", "600",
-            "-lang", languages,
-            "-o", output_file,
-            "-nopreproc",
-            input_file
-        ]
-        subprocess.check_call(pdfsandwich_args)
+        subprocess.check_call([
+            "ocrmypdf",
+            "--language", languages,
+            input_file,
+            output_file,
+        ])
     else:
         shutil.copy2(input_file, output_file)
 
