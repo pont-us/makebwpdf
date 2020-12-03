@@ -1,10 +1,12 @@
 == makebwpdf
 
-Convert a series of image files to a multi-page bilevel (i.e. black and
-white) PDF.
+Convert a series of image files, or data from a scanner, to a multi-page
+bilevel (i.e. black and white) PDF with optional OCR. makebwpdf can also
+fix the incorrect page positioning for A4 and A5 scans produced by the
+Brother MFC-L2710DW multifunction device.
 
 Requires: https://exactcode.com/opensource/exactimage/[econvert],
-tiffcp, tiff2pdf, pdfsandwich, pdftk, and PIL.
+tiffcp, tiff2pdf, ocrmypdf, pdftk, and PIL.
 
 By Pontus Lurcock, 2017-2020 (pont -at- talvi.net).
 Released under the MIT license (see accompanying file LICENSE for details).
@@ -21,7 +23,8 @@ To uninstall, use `pip3 uninstall makebwpdf`.
 ....
 usage: makebwpdf [-h] [--brightness BRIGHTNESS] --output OUTPUT [--append]
                  [--papersize PAPERSIZE] [--tempdir TEMPDIR] [--rotate ROTATE]
-                 [--languages LANGUAGES] [--scan] [--correct-position]
+                 [--languages LANGUAGES] [--scan] [--device DEVICE]
+                 [--correct-position] [--invert]
                  [input_files [input_files ...]]
 
 positional arguments:
@@ -35,7 +38,7 @@ optional arguments:
                         Output filename (required)
   --append, -a          Append page(s) to existing PDF output file
   --papersize PAPERSIZE, -p PAPERSIZE
-                        Paper size (passed to tiff2pdf)
+                        Paper size
   --tempdir TEMPDIR, -t TEMPDIR
                         Use TEMPDIR as temporary directory
   --rotate ROTATE, -r ROTATE
@@ -43,6 +46,9 @@ optional arguments:
   --languages LANGUAGES, -l LANGUAGES
                         OCR the PDF in these languages (e.g. 'eng+deu')
   --scan, -s            Acquire image from scanner (ignores input files)
+  --device DEVICE, -d DEVICE
+                        Scanner device (implies --scan)
   --correct-position, -c
                         Correct positioning for scans from Brother MFC-L2710DW
+  --invert, -i          Invert colours
 ....
