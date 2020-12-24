@@ -26,37 +26,50 @@ def main():
                         type=str, nargs=1,
                         default="0")
     parser.add_argument("--output", "-o",
-                        help="Output filename (required)",
-                        type=str, required=True)
+                        help="Output filename (required, unless -e supplied)",
+                        metavar="FILENAME",
+                        type=str, required=False)
     parser.add_argument("--append", "-a",
                         help="Append page(s) to existing PDF output file",
                         action="store_true")
     parser.add_argument("--papersize", "-p",
-                        help="Paper size",
+                        metavar="ISO_NAME",
+                        help="Paper size (A4 or A5)",
                         type=str, default="A4")
     parser.add_argument("--tempdir", "-t",
-                        help="Use TEMPDIR as temporary directory",
+                        help="Use DIRECTORY as temporary directory",
+                        metavar="DIRECTORY",
                         type=str)
     parser.add_argument("--rotate", "-r",
                         help="Rotate pages by the given number of degrees",
+                        metavar="DEGREES",
                         type=str)
     parser.add_argument("--languages", "-l",
                         help="OCR the PDF in these languages "
                              "(e.g. 'eng+deu')",
+                        metavar="ISO_639_2_CODES",
                         type=str)
     parser.add_argument("--scan", "-s",
                         help="Acquire image from scanner (ignores input files)",
                         action="store_true")
     parser.add_argument("--device", "-d",
                         help="Scanner device (implies --scan)",
+                        metavar="SANE_DEVICE_NAME",
                         type=str)
     parser.add_argument("--correct-position", "-c",
-                        help="Correct positioning for scans from "
+                        help="Correct positioning of flatbed scans from "
                              "Brother MFC-L2710DW",
                         action="store_true")
     parser.add_argument("--invert", "-i",
                         help="Invert colours",
                         action="store_true")
+    parser.add_argument("--export-repositioned", "-e", type=str,
+                        metavar="FILENAME",
+                        help="Don't convert to bilevel or make a PDF. "
+                             "Instead, export first repositioned page to "
+                             "specified file.")
+    parser.add_argument("--colour", "-C", action="store_true",
+                        help="Make initial scan in colour (useful with -e)")
     parser.add_argument("input_files",
                         type=str, nargs="*",
                         help="input filename")
@@ -66,13 +79,19 @@ def main():
         exit_with_error(": error: the --scan option, the --device option, "
                         " or at least one input file must be supplied.")
 
-    if args.append:
-        if not os.path.isfile(args.output):
-            exit_with_error("cannot append, since output file does not exist")
-    else:
-        if os.path.exists(args.output):
-            exit_with_error("output file exists "
-                            "(use --append to append to it)")
+    if not args.output and not args.export_repositioned:
+        exit_with_error("either --output or --export-repositioned must be"
+                        "given.")
+
+    if args.output:
+        if args.append:
+            if not os.path.isfile(args.output):
+                exit_with_error("cannot append, "
+                                "since output file does not exist.")
+        else:
+            if os.path.exists(args.output):
+                exit_with_error("output file exists "
+                                "(use --append to append to it).")
 
     if args.tempdir is None:
         with TemporaryDirectory() as tempdir:
@@ -81,17 +100,22 @@ def main():
         process(args, os.path.abspath(args.tempdir))
 
 
-def exit_with_error(message):
+def exit_with_error(message: str):
     print(os.path.basename(sys.argv[0]) + ": " + message, file=sys.stderr)
     sys.exit(1)
 
 
-def process(args, tempdir):
+def process(args, tempdir: str) -> None:
     pages_dir = os.path.join(tempdir, "pages_positioned")
     input_files = scan_document(args, tempdir) if (args.scan or args.device) \
         else args.input_files
     basenames = copy_and_reposition(input_files, args,
                                     pages_dir)
+    if args.export_repositioned:
+        shutil.copy2(os.path.join(pages_dir, basenames[0] + ".png"),
+                     args.export_repositioned)
+        return
+
     pages_bilevel_dir = os.path.join(tempdir, "pages_bilevel")
     convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir)
     make_multipage_tiff(basenames, pages_bilevel_dir, tempdir)
@@ -117,7 +141,7 @@ def scan_document(args, tempdir):
         "-x", str(size[0]),
         "-y", str(size[1]),
         "--resolution", "600",
-        "--mode", "True Gray",
+        "--mode", "24bit Color[Fast]" if args.colour else "True Gray",
         "--format", "tiff",
         "--output-file", os.path.join(tempdir, "scan.tiff")
     ]
@@ -157,7 +181,8 @@ def reposition_a4(input_filename, output_filename):
     scan = Image.open(input_filename)
     assert(scan.size == (4912, 6874))
     cropped = scan.crop((0, 0, 4889, 6874))
-    full_size = Image.new(mode="L", size=(4961, 7016), color=255)
+    full_size = Image.new(mode=scan.mode, size=(4961, 7016),
+                          color=255 if scan.mode == "L" else (255, 255, 255))
     full_size.paste(cropped, (72, 90))
     full_size.save(output_filename)
 
