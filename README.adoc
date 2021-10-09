@@ -13,11 +13,18 @@ Released under the MIT license (see accompanying file LICENSE for details).
 
 === Installation
 
+On Ubuntu 20.04, the requirements can be installed with
+....
+sudo apt install python3-pip python3-pil exactimage libtiff-tools ocrmypdf pdftk
+....
+
 The file `makebwpdf.py` can be run directly. It can also be installed by
-running `pip3 install makebwpdf/` from the parent directory of the repository,
-which will make the command `makebwpdf` available on the execution path.
-`pip3 install --user makebwpdf` will install it for the current user only.
-To uninstall, use `pip3 uninstall makebwpdf`.
+running `python3 -m pip install makebwpdf/` from the _parent_ directory of
+the repository, which will make the command `makebwpdf` available on the
+execution path. `python3 -m pip install --user makebwpdf/` will install it
+for the current user only.
+
+To uninstall, use `python3 -m pip uninstall makebwpdf`.
 
 === Usage
 ....
