@@ -109,8 +109,8 @@ def process(args, tempdir: str) -> None:
     pages_dir = os.path.join(tempdir, "pages_positioned")
     input_files = scan_document(args, tempdir) if (args.scan or args.device) \
         else args.input_files
-    basenames = copy_and_reposition(input_files, args,
-                                    pages_dir)
+    basenames = convert_and_reposition(input_files, args,
+                                       pages_dir)
     if args.export_repositioned:
         shutil.copy2(os.path.join(pages_dir, basenames[0] + ".png"),
                      args.export_repositioned)
@@ -154,8 +154,8 @@ def scan_document(args, tempdir):
     return [output_file]
 
 
-def copy_and_reposition(input_files, args, output_dir):
-    """Copy input files and, optionally, reposition content.
+def convert_and_reposition(input_files, args, output_dir):
+    """Convert input files to PNG and, optionally, reposition content.
 
     We convert/save to PNG rather than back to TIFF because, for some
     unknown reason, econvert chokes on TIFFs saved by PIL."""
