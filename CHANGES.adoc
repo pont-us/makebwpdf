@@ -4,6 +4,7 @@
 
  - Add --export-repositioned and --colour options.
  - Improve installation instructions.
+ - Fix minor bug in handling of non-repositioned pages.
  - Add a changelog.
 
 === Older versions

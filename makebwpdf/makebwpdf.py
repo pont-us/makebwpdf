@@ -170,8 +170,8 @@ def copy_and_reposition(input_files, args, output_dir):
         if args.correct_position:
             reposition(args.papersize.lower(), input_filename, output_filename)
         else:
-            subprocess.run(["econvert", input_filename, output_filename])
-            shutil.copy2(input_filename, output_filename)
+            subprocess.run(["econvert", "-i", input_filename, "-o",
+                            output_filename])
         i += 1
     return basenames
 
