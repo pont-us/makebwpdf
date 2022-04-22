@@ -244,17 +244,13 @@ def reposition(paper_size, input_filename, output_filename):
     scan = Image.open(input_filename)
     assert scan.size == (in_w, in_h)
     cropped = scan.crop((0, 0, crop_w, crop_h))
-    full_size = _new_pil_image(scan.mode, out_w, out_h)
+    full_size = Image.new(
+        mode=scan.mode,
+        size=(out_w, out_h),
+        color=255 if scan.mode == "L" else (255, 255, 255),
+    )
     full_size.paste(cropped, (offset_x, offset_y))
     full_size.save(output_filename)
-
-
-def _new_pil_image(scan_mode, width, height):
-    return Image.new(
-        mode=scan_mode,
-        size=(width, height),
-        color=255 if scan_mode == "L" else (255, 255, 255),
-    )
 
 
 def convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir):
