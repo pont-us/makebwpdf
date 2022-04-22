@@ -168,10 +168,7 @@ def copy_and_reposition(input_files, args, output_dir):
         basenames.append(output_basename)
         output_filename = os.path.join(output_dir, output_basename + ".png")
         if args.correct_position:
-            if args.papersize.lower() == "a5":
-                reposition_a5(input_filename, output_filename)
-            else:
-                reposition_a4(input_filename, output_filename)
+            reposition(args.papersize.lower(), input_filename, output_filename)
         else:
             subprocess.run(["econvert", input_filename, output_filename])
             shutil.copy2(input_filename, output_filename)
@@ -179,21 +176,18 @@ def copy_and_reposition(input_files, args, output_dir):
     return basenames
 
 
-def reposition_a4(input_filename, output_filename):
+def reposition(paper_size, input_filename, output_filename):
+    settings = dict(
+        a4=(4912, 6874, 4889, 6874, 4961, 7016, 72, 90),
+        a5=(3440, 4911, 3362, 4819, 3496, 4961, 70, 90))
+    assert paper_size in settings, "Unknown paper size %s" % paper_size
+    in_w, in_h, crop_w, crop_h, out_w, out_h, offset_x, offset_y = \
+        settings[paper_size]
     scan = Image.open(input_filename)
-    assert(scan.size == (4912, 6874))
-    cropped = scan.crop((0, 0, 4889, 6874))
-    full_size = _new_pil_image(scan.mode, 4961, 7016)
-    full_size.paste(cropped, (72, 90))
-    full_size.save(output_filename)
-
-
-def reposition_a5(input_filename, output_filename):
-    scan = Image.open(input_filename)
-    assert(scan.size == (3440, 4911))
-    cropped = scan.crop((0, 0, 3362, 4819))
-    full_size = _new_pil_image(scan.mode, 3496, 4961)
-    full_size.paste(cropped, (70, 90))
+    assert scan.size == (in_w, in_h)
+    cropped = scan.crop((0, 0, crop_w, crop_h))
+    full_size = _new_pil_image(scan.mode, out_w, out_h)
+    full_size.paste(cropped, (offset_x, offset_y))
     full_size.save(output_filename)
 
 
