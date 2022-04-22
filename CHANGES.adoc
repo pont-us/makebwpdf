@@ -1,0 +1,11 @@
+== makebwpdf changelog
+
+=== Version 1.0.3 (in development)
+
+ - Add --export-repositioned and --colour options.
+ - Improve installation instructions.
+ - Add a changelog.
+
+=== Older versions
+
+No changelog available.
