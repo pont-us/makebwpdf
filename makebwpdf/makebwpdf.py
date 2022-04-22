@@ -141,6 +141,8 @@ def scan_document(args, tempdir):
         "-x", str(size[0]),
         "-y", str(size[1]),
         "--resolution", "600",
+        # NB: mode names are scanner-specific, and a unique prefix
+        # apparently suffices to specify the mode.
         "--mode", "24bit Color[Fast]" if args.colour else "True Gray",
         "--format", "tiff",
         "--output-file", os.path.join(tempdir, "scan.tiff")
@@ -181,8 +183,7 @@ def reposition_a4(input_filename, output_filename):
     scan = Image.open(input_filename)
     assert(scan.size == (4912, 6874))
     cropped = scan.crop((0, 0, 4889, 6874))
-    full_size = Image.new(mode=scan.mode, size=(4961, 7016),
-                          color=255 if scan.mode == "L" else (255, 255, 255))
+    full_size = _new_pil_image(scan.mode, 4961, 7016)
     full_size.paste(cropped, (72, 90))
     full_size.save(output_filename)
 
@@ -191,9 +192,14 @@ def reposition_a5(input_filename, output_filename):
     scan = Image.open(input_filename)
     assert(scan.size == (3440, 4911))
     cropped = scan.crop((0, 0, 3362, 4819))
-    full_size = Image.new(mode="L", size=(3496, 4961), color=255)
+    full_size = _new_pil_image(scan.mode, 3496, 4961)
     full_size.paste(cropped, (70, 90))
     full_size.save(output_filename)
+
+
+def _new_pil_image(scan_mode, width, height):
+    return Image.new(mode=scan_mode, size=(width, height),
+                     color=255 if scan_mode == "L" else (255, 255, 255))
 
 
 def convert_to_bilevel(args, basenames, pages_bilevel_dir, pages_dir):
