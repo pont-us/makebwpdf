@@ -10,7 +10,7 @@ with open(os.path.join(cwd, "README.adoc")) as fh:
 
 setup(
     name="makebwpdf",
-    version="1.0.2",
+    version="1.0.3dev0",
     author="Pontus Lurcock",
     author_email="pont@talvi.net",
     description="Convert image files to bilevel PDFs.",
