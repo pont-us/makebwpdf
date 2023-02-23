@@ -47,7 +47,7 @@ def main():
         "--papersize",
         "-p",
         metavar="ISO_NAME",
-        help="Paper size (A4 or A5)",
+        help="Paper size (A4, A5, or A6)",
         type=str,
         default="A4",
     )
@@ -182,8 +182,12 @@ def scan_document(args, tempdir):
 
     output_file = os.path.join(tempdir, "scan.tiff")
 
-    # Unless A5 explicitly specified, we assume A4.
-    size = (148, 210) if args.papersize.lower() == "a5" else (210, 297)
+    # Unless A5 or A6 explicitly specified, we assume A4.
+    size = dict(
+        a4=(210, 297),
+        a5=(148, 210),
+        a6=(105, 148)
+    ).get(args.papersize.lower())
 
     scanimage_args = [
         "scanimage",
@@ -236,6 +240,7 @@ def reposition(paper_size, input_filename, output_filename):
     settings = dict(
         a4=(4912, 6874, 4889, 6874, 4961, 7016, 72, 90),
         a5=(3440, 4911, 3362, 4819, 3496, 4961, 70, 90),
+        a6=(2432, 3446, 2455, 3356, 2480, 3496, 70, 90),
     )
     assert paper_size in settings, "Unknown paper size %s" % paper_size
     in_w, in_h, crop_w, crop_h, out_w, out_h, offset_x, offset_y = settings[
