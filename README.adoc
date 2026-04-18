@@ -8,7 +8,7 @@ Brother MFC-L2710DW multifunction device.
 Requires: https://exactcode.com/opensource/exactimage/[econvert],
 tiffcp, tiff2pdf, ocrmypdf, pdftk, and PIL.
 
-By Pontus Lurcock, 2017-2020 (pont -at- talvi.net).
+By Pontus Lurcock, 2017-2023 (pont -at- talvi.net).
 Released under the MIT license (see accompanying file LICENSE for details).
 
 === Installation
@@ -28,10 +28,11 @@ To uninstall, use `python3 -m pip uninstall makebwpdf`.
 
 === Usage
 ....
-usage: makebwpdf [-h] [--brightness BRIGHTNESS] --output OUTPUT [--append]
-                 [--papersize PAPERSIZE] [--tempdir TEMPDIR] [--rotate ROTATE]
-                 [--languages LANGUAGES] [--scan] [--device DEVICE]
-                 [--correct-position] [--invert]
+usage: makebwpdf [-h] [--brightness BRIGHTNESS] [--output FILENAME] [--append]
+                 [--papersize ISO_NAME] [--tempdir DIRECTORY]
+                 [--rotate DEGREES] [--languages ISO_639_2_CODES] [--scan]
+                 [--device SANE_DEVICE_NAME] [--correct-position] [--invert]
+                 [--export-repositioned FILENAME] [--colour]
                  [input_files [input_files ...]]
 
 positional arguments:
@@ -41,21 +42,26 @@ optional arguments:
   -h, --help            show this help message and exit
   --brightness BRIGHTNESS, -b BRIGHTNESS
                         Brightness adjustment (default: 0)
-  --output OUTPUT, -o OUTPUT
-                        Output filename (required)
+  --output FILENAME, -o FILENAME
+                        Output filename (required, unless -e supplied)
   --append, -a          Append page(s) to existing PDF output file
-  --papersize PAPERSIZE, -p PAPERSIZE
-                        Paper size
-  --tempdir TEMPDIR, -t TEMPDIR
-                        Use TEMPDIR as temporary directory
-  --rotate ROTATE, -r ROTATE
+  --papersize ISO_NAME, -p ISO_NAME
+                        Paper size (A4, A5, or A6)
+  --tempdir DIRECTORY, -t DIRECTORY
+                        Use DIRECTORY as temporary directory
+  --rotate DEGREES, -r DEGREES
                         Rotate pages by the given number of degrees
-  --languages LANGUAGES, -l LANGUAGES
+  --languages ISO_639_2_CODES, -l ISO_639_2_CODES
                         OCR the PDF in these languages (e.g. 'eng+deu')
   --scan, -s            Acquire image from scanner (ignores input files)
-  --device DEVICE, -d DEVICE
+  --device SANE_DEVICE_NAME, -d SANE_DEVICE_NAME
                         Scanner device (implies --scan)
   --correct-position, -c
-                        Correct positioning for scans from Brother MFC-L2710DW
+                        Correct positioning of flatbed scans from Brother
+                        MFC-L2710DW
   --invert, -i          Invert colours
+  --export-repositioned FILENAME, -e FILENAME
+                        Don't convert to bilevel or make a PDF. Instead,
+                        export first repositioned page to specified file.
+  --colour, -C          Make initial scan in colour (useful with -e)
 ....

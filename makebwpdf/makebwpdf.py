@@ -4,7 +4,7 @@
 Convert a series of image files to a multi-page bilevel (i.e. black and
 white) PDF.
 
-By Pontus Lurcock, 2017-2020 (pont -at- talvi.net).
+By Pontus Lurcock, 2017-2023 (pont -at- talvi.net).
 Released under the MIT license (see accompanying file LICENSE for details).
 """
 
